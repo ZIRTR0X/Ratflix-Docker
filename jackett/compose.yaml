@@ -1,0 +1,18 @@
+services:
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    container_name: jackett
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - AUTO_UPDATE=true # Jackett likes to update itself
+    volumes:
+      - ./config:/config
+      # (Optional) Allows downloading blackhole torrents
+      # - ${DOWNLOADS_PATH}/blackhole:/downloads 
+    network_mode: service:gluetun
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: unless-stopped

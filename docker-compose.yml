@@ -1,0 +1,22 @@
+# Main file (global)
+name: ratflix-stack
+
+include:
+  - ./gluetun/compose.yaml
+  - ./flaresolverr/compose.yaml
+  - ./jackett/compose.yaml
+  - ./prowlarr/compose.yaml
+  - ./qbittorrent/compose.yaml
+  - ./radarr/compose.yaml
+  - ./sonarr/compose.yaml
+  - ./bazarr/compose.yaml
+  - ./jellyfin/compose.yaml
+  - ./homarr/compose.yaml
+  - ./jellyseerr/compose.yaml
+  - ./caddy/compose.yaml
+  - ./rustatio/compose.yaml
+
+networks:
+  media-net:
+    name: media-shared-network
+    driver: bridge

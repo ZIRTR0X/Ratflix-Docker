@@ -1,0 +1,45 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - 9696:9696 # Prowlarr Web UI
+      - 8080:8080 # qBittorrent Web UI
+      - 8090:8080 # Rustatio Web UI
+      - 8000:8000 # Gluetun Control Server
+
+      # --- TORRENT PORTS (P2P) ---
+      - 6881:6881 # qBittorrent TCP
+      - 6881:6881/udp # qBittorrent UDP
+      - 8191:8191 # FlareSolverr
+      - 9117:9117 # Jackett
+    volumes:
+      - ./gluetun:/gluetun
+    environment:
+      - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
+      - VPN_TYPE=${VPN_TYPE}
+
+      # --- WireGuard ---
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+
+      # --- OpenVPN (only when VPN_TYPE=openvpn) ---
+      - OPENVPN_USER=${OPENVPN_USER:-}
+      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD:-}
+
+      - FIREWALL_OUTBOUND_SUBNETS=${LAN_SUBNET}
+      # Server country (Switzerland = great for privacy, or France, Netherlands...)
+      - SERVER_COUNTRIES=${SERVER_COUNTRIES}
+      - TZ=${TZ}
+
+      # Lets Rustatio talk to Gluetun
+      - 'HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE={"auth":"apikey","apikey":"${GLUETUN_API_KEY}"}'
+    restart: always
+    healthcheck:
+      test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
+      start_period: 60s
+      interval: 10s
+      retries: 5

@@ -1,0 +1,20 @@
+services:
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ./config:/config
+      # IMPORTANT: same paths as Jellyfin
+      - ${MEDIA_PATH}:${MEDIA_PATH}
+      - ${DATA_PATH}:${DATA_PATH}
+      - ${DOWNLOADS_PATH}:/downloads
+      # If downloads live elsewhere: - /mnt/downloads:/downloads
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+    networks:
+      - media-net

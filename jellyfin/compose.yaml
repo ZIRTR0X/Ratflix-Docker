@@ -1,0 +1,17 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    user: ${PUID}:${PGID}
+    network_mode: "host" # Required for DLNA / casting
+    environment:
+      - JELLYFIN_PublishedServerUrl=http://${SERVER_IP}:8096
+    volumes:
+      - ./config:/config
+      - ./cache:/cache
+      - ${MEDIA_PATH}:${MEDIA_PATH}
+      - ${DATA_PATH}:${DATA_PATH}
+    devices:
+      - /dev/dri:/dev/dri
+    restart: unless-stopped
+

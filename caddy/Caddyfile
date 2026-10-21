@@ -1,0 +1,7 @@
+{$JELLYFIN_DOMAIN} {
+    reverse_proxy localhost:8096
+}
+
+{$JELLYSEERR_DOMAIN} {
+    reverse_proxy localhost:5055
+}

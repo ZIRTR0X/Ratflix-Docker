@@ -1,0 +1,68 @@
+# APPLICATION DATA
+
+**/config/
+**/configs/
+**/cache/
+**/data/
+
+# Databases
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+**/*.sql
+**/*.dump
+
+# Backups
+**/*.bak
+**/*.backup
+**/*.old
+**/*.orig
+
+# SECRETS AND ENVIRONMENT VARIABLES
+
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Secret files
+secrets/
+**/secrets/
+*.secret
+*.secrets
+
+# Private keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# LOGS
+
+*.log
+logs/
+**/logs/
+
+# TEMPORARY FILES
+
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# OPERATING SYSTEM FILES
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# DOCKER OVERRIDES
+
+docker-compose.override.yml
+compose.override.yaml
+compose.override.yml
+
+.git-old

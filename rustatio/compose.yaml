@@ -1,0 +1,28 @@
+services:
+  rustatio:
+    image: ghcr.io/takitsu21/rustatio:latest
+    container_name: rustatio
+
+    environment:
+      - PORT=8081
+      - RUST_LOG=info
+      - PUID=${PUID}
+      - PGID=${PGID}
+
+      # Rustatio auth
+      - AUTH_TOKEN=${RUSTATIO_AUTH_TOKEN}
+
+      # Sync with the Gluetun forwarded port
+      - VPN_PORT_SYNC=on
+      - GLUETUN_CONTROL_SERVER_API_KEY=${GLUETUN_API_KEY}
+
+    volumes:
+      - ./rustatio/data:/data
+
+    network_mode: service:gluetun
+
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
+    restart: unless-stopped
