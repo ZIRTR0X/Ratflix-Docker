@@ -9,7 +9,7 @@ services:
     ports:
       - 9696:9696 # Prowlarr Web UI
       - 8080:8080 # qBittorrent Web UI
-      - 8090:8080 # Rustatio Web UI
+      - 8090:8081 # Rustatio Web UI
       - 8000:8000 # Gluetun Control Server
 
       # --- TORRENT PORTS (P2P) ---

@@ -66,7 +66,7 @@ The stack runs in three network zones:
 | [Jackett](https://github.com/Jackett/Jackett) | Alternative indexer proxy, for sites Prowlarr doesn't support. | `http://SERVER_IP:9117` |
 | [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) | Solves Cloudflare challenges for Prowlarr and Jackett. No UI. | `http://SERVER_IP:8191` |
 | [qBittorrent](https://www.qbittorrent.org) | Torrent client. Downloads into `DOWNLOADS_PATH`. | `http://SERVER_IP:8080` |
-| [Rustatio](https://github.com/takitsu21/rustatio) | Torrent ratio tool. Syncs with the Gluetun forwarded port through the control server. | `http://SERVER_IP:8090` (see [Known issues](#known-issues)) |
+| [Rustatio](https://github.com/takitsu21/rustatio) | Torrent ratio tool. Syncs with the Gluetun forwarded port through the control server. | `http://SERVER_IP:8090` |
 | [Gluetun](https://github.com/qdm12/gluetun) | VPN client (NordVPN over WireGuard by default) with a built-in kill switch. The control server runs on port 8000. | `http://SERVER_IP:8000` |
 | [Homarr](https://homarr.dev) | Dashboard with links to all the services. Can see Docker containers. | `http://SERVER_IP:7575` |
 | [Caddy](https://caddyserver.com) | Reverse proxy with automatic HTTPS (Let's Encrypt) for Jellyfin and Jellyseerr. | `https://JELLYFIN_DOMAIN`, `https://JELLYSEERR_DOMAIN` |
@@ -189,7 +189,3 @@ curl -H "X-API-Key: $GLUETUN_API_KEY" http://localhost:8000/v1/openvpn/portforwa
 - Never commit `.env`. It holds your VPN key and API tokens.
 - Only Jellyfin and Jellyseerr are exposed to the internet, through Caddy. Keep the other ports on your LAN.
 - Homarr has access to the Docker socket, which is equivalent to root on the host. Don't expose it publicly.
-
-## Known issues
-
-- **Rustatio port**: Gluetun publishes `8090:8080`, but container port 8080 belongs to qBittorrent, and Rustatio listens on `PORT=8081`. To reach Rustatio on 8090, change the mapping in `gluetun/compose.yaml` to `8090:8081`.
