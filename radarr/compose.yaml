@@ -8,11 +8,12 @@ services:
       - TZ=${TZ}
     volumes:
       - ./config:/config
-      # IMPORTANT: same paths as Jellyfin
-      - ${MEDIA_PATH}:${MEDIA_PATH}
-      - ${DATA_PATH}:${DATA_PATH}
-      - ${DOWNLOADS_PATH}:/downloads
-      # If downloads live elsewhere: - /mnt/downloads:/downloads
+      # Pool mergerfs (disques locaux + NAS)
+      - ${POOL_PATH}:${POOL_PATH}
+      # Anciens chemins, gardés comme alias du pool
+      - ${POOL_PATH}:${MEDIA_PATH}
+      - ${POOL_PATH}:${DATA_PATH}
+      - ${POOL_PATH}/downloads:/downloads
     ports:
       - 7878:7878
     restart: unless-stopped

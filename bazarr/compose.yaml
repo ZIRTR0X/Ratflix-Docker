@@ -8,9 +8,11 @@ services:
       - TZ=${TZ}
     volumes:
       - ./config:/config
-      # REQUIRED: same paths as your media
-      - ${MEDIA_PATH}:${MEDIA_PATH}
-      - ${DATA_PATH}:${DATA_PATH}
+      # Pool mergerfs (disques locaux + NAS)
+      - ${POOL_PATH}:${POOL_PATH}
+      # Anciens chemins, gardés comme alias du pool
+      - ${POOL_PATH}:${MEDIA_PATH}
+      - ${POOL_PATH}:${DATA_PATH}
     ports:
       - 6767:6767
     restart: unless-stopped

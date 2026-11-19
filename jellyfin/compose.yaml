@@ -9,8 +9,11 @@ services:
     volumes:
       - ./config:/config
       - ./cache:/cache
-      - ${MEDIA_PATH}:${MEDIA_PATH}
-      - ${DATA_PATH}:${DATA_PATH}
+      # Pool mergerfs (disques locaux + NAS)
+      - ${POOL_PATH}:${POOL_PATH}
+      # Anciens chemins, gardés comme alias du pool
+      - ${POOL_PATH}:${MEDIA_PATH}
+      - ${POOL_PATH}:${DATA_PATH}
     devices:
       - /dev/dri:/dev/dri
     restart: unless-stopped
