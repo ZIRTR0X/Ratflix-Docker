@@ -60,10 +60,11 @@ Every disk is merged into one [mergerfs](https://github.com/trapexit/mergerfs) p
 ```
 192.168.1.30:/volume1/data1 /mnt/nas1 nfs4 vers=4.1,hard,noatime,_netdev 0 0
 # ... same for volume2 to volume4
-/mnt/RatMovies:/mnt/RADATA:/mnt/nas1:/mnt/nas2:/mnt/nas3:/mnt/nas4 /mnt/data fuse.mergerfs allow_other,cache.files=off,category.create=epmfs,func.getattr=newest,dropcacheonclose=true,minfreespace=50G,moveonenospc=true,fsname=mergerfs,_netdev,nofail,x-systemd.requires-mounts-for=/mnt/nas1,... 0 0
+/mnt/RatMovies:/mnt/RADATA:/mnt/nas1:/mnt/nas2:/mnt/nas3:/mnt/nas4 /mnt/data fuse.mergerfs allow_other,cache.files=off,category.create=mspmfs,func.getattr=newest,dropcacheonclose=true,minfreespace=50G,moveonenospc=true,fsname=mergerfs,_netdev,nofail,x-systemd.requires-mounts-for=/mnt/nas1,... 0 0
 ```
 
-- `category.create=epmfs` creates new files on the disk with the most free space **among those that already have the parent folder**. A download and its library hardlink therefore stay on the same disk. For this to work, `downloads/`, `FILMS/`, `SERIES/` and `ANIMES/` must exist on every disk.
+- `category.create=mspmfs` creates new files on the disk with the most free space **among those that already have the parent folder**. A download and its library hardlink therefore stay on the same disk. For this to work, `downloads/`, `FILMS/`, `SERIES/` and `ANIMES/` must exist on every disk.
+- When every disk holding the folder is below `minfreespace` (50G), mspmfs falls back to the closest parent folder and recreates the path on another disk, instead of failing with `No space left on device` (`epmfs` would fail). This matters for subtitles, artwork and upgrades written into existing folders on a full local disk.
 - A systemd override (`/etc/systemd/system/docker.service.d/mounts.conf`, `RequiresMountsFor=/mnt/data`) keeps Docker from starting before the pool is mounted.
 
 ## Services
