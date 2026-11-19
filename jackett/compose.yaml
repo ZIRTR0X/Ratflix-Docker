@@ -10,7 +10,7 @@ services:
     volumes:
       - ./config:/config
       # (Optional) Allows downloading blackhole torrents
-      # - ${DOWNLOADS_PATH}/blackhole:/downloads 
+      # - ${POOL_PATH}/downloads/blackhole:/downloads 
     network_mode: service:gluetun
     depends_on:
       gluetun:

@@ -53,6 +53,19 @@ The stack runs in three network zones:
 
 `FIREWALL_OUTBOUND_SUBNETS` lets the VPN'd services reach your LAN, so Radarr and Sonarr can still talk to qBittorrent and Prowlarr.
 
+## Storage
+
+Every disk is merged into one [mergerfs](https://github.com/trapexit/mergerfs) pool at `POOL_PATH` (`/mnt/data`): the two local disks plus four Synology NAS volumes mounted over NFS (`/mnt/nas1` to `/mnt/nas4`). Both are declared in `/etc/fstab` on the host:
+
+```
+192.168.1.30:/volume1/data1 /mnt/nas1 nfs4 vers=4.1,hard,noatime,_netdev 0 0
+# ... same for volume2 to volume4
+/mnt/RatMovies:/mnt/RADATA:/mnt/nas1:/mnt/nas2:/mnt/nas3:/mnt/nas4 /mnt/data fuse.mergerfs allow_other,cache.files=off,category.create=epmfs,func.getattr=newest,dropcacheonclose=true,minfreespace=50G,moveonenospc=true,fsname=mergerfs,_netdev,nofail,x-systemd.requires-mounts-for=/mnt/nas1,... 0 0
+```
+
+- `category.create=epmfs` creates new files on the disk with the most free space **among those that already have the parent folder**. A download and its library hardlink therefore stay on the same disk. For this to work, `downloads/`, `FILMS/`, `SERIES/` and `ANIMES/` must exist on every disk.
+- A systemd override (`/etc/systemd/system/docker.service.d/mounts.conf`, `RequiresMountsFor=/mnt/data`) keeps Docker from starting before the pool is mounted.
+
 ## Services
 
 | Service | Role | URL |
@@ -65,7 +78,7 @@ The stack runs in three network zones:
 | [Prowlarr](https://prowlarr.com) | Indexer manager: configure your torrent sites once and they sync to Radarr and Sonarr. | `http://SERVER_IP:9696` |
 | [Jackett](https://github.com/Jackett/Jackett) | Alternative indexer proxy, for sites Prowlarr doesn't support. | `http://SERVER_IP:9117` |
 | [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) | Solves Cloudflare challenges for Prowlarr and Jackett. No UI. | `http://SERVER_IP:8191` |
-| [qBittorrent](https://www.qbittorrent.org) | Torrent client. Downloads into `DOWNLOADS_PATH`. | `http://SERVER_IP:8080` |
+| [qBittorrent](https://www.qbittorrent.org) | Torrent client. Downloads into `POOL_PATH/downloads`. | `http://SERVER_IP:8080` |
 | [Rustatio](https://github.com/takitsu21/rustatio) | Torrent ratio tool. Syncs with the Gluetun forwarded port through the control server. | `http://SERVER_IP:8090` |
 | [Gluetun](https://github.com/qdm12/gluetun) | VPN client (NordVPN over WireGuard by default) with a built-in kill switch. The control server runs on port 8000. | `http://SERVER_IP:8000` |
 | [Homarr](https://homarr.dev) | Dashboard with links to all the services. Can see Docker containers. | `http://SERVER_IP:7575` |
@@ -107,8 +120,8 @@ nano .env
 |---|---|
 | `PUID` / `PGID` | Your user and group IDs (run `id`). Files are created with these IDs. |
 | `TZ` | Time zone, e.g. `Europe/Paris` |
-| `MEDIA_PATH`, `DATA_PATH` | Your media disks. They are mounted **at the same path** inside every container, so paths match across Jellyfin, Radarr, Sonarr and Bazarr. |
-| `DOWNLOADS_PATH` | Where qBittorrent saves files. Mounted as `/downloads`. |
+| `POOL_PATH` | The mergerfs pool (see [Storage](#storage)). Mounted **at the same path** inside every container, so paths match across Jellyfin, Radarr, Sonarr and Bazarr. `POOL_PATH/downloads` is mounted as `/downloads` in qBittorrent, Radarr, Sonarr and Prowlarr. |
+| `MEDIA_PATH`, `DATA_PATH` | Former disk paths. Inside containers they are aliases of the pool, so libraries configured with these paths keep working. |
 | `LAN_SUBNET` | Your local network, e.g. `192.168.1.0/24`. Lets VPN'd services reach the LAN. |
 | `SERVER_IP` | LAN IP of the server. Used as Jellyfin's published URL. |
 | `JELLYFIN_DOMAIN`, `JELLYSEERR_DOMAIN` | Public domains served by Caddy |
@@ -144,7 +157,8 @@ Services in the Gluetun namespace aren't on `media-net`, so connect them **throu
    - *Settings → Apps*: add Radarr (`http://SERVER_IP:7878`) and Sonarr (`http://SERVER_IP:8989`) with their API keys. Set the Prowlarr server to `http://SERVER_IP:9696`.
 3. **Radarr / Sonarr**
    - *Settings → Download Clients*: add qBittorrent (host `SERVER_IP`, port `8080`).
-   - *Settings → Media Management*: add root folders under `MEDIA_PATH` or `DATA_PATH`.
+   - *Settings → Media Management*: add root folders under `POOL_PATH` and enable hardlinks.
+   - *Settings → Download Clients → Remote Path Mappings*: map `/downloads/` to the `downloads/` folder **under the same mount as the root folders** (e.g. `POOL_PATH/downloads/`). Hardlinks fail across two mounts, even two aliases of the pool.
 4. **Bazarr**: connect to Radarr and Sonarr (`SERVER_IP` plus their API keys), then choose languages and subtitle providers.
 5. **Jellyfin**: run the setup wizard and add libraries that point to the same folders as Radarr and Sonarr. For hardware transcoding, go to *Dashboard → Playback → Transcoding* and pick VAAPI or QSV.
 6. **Jellyseerr**: sign in with Jellyfin (`http://SERVER_IP:8096`), then add Radarr and Sonarr.

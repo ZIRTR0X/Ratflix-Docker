@@ -8,7 +8,7 @@ services:
       - TZ=${TZ}
     volumes:
       - ./config:/config
-      - ${DOWNLOADS_PATH}:/downloads
+      - ${POOL_PATH}/downloads:/downloads
     network_mode: service:gluetun
     depends_on:
       gluetun:
